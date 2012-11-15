@@ -1,0 +1,37 @@
+Microsoft Visual Studio Solution File, Format Version 10.00
+# Visual Studio 2008
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ShowDemo", "ShowDemo\ShowDemo.vcproj", "{32821F4C-9227-3B03-B97A-2CD938863A61}"
+	ProjectSection(ProjectDependencies) = postProject
+		{85B2BB1E-A0B4-3C0D-A423-4AA574176379} = {85B2BB1E-A0B4-3C0D-A423-4AA574176379}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "DrawWindow", "DrawWindow\DrawWindow.vcproj", "{85B2BB1E-A0B4-3C0D-A423-4AA574176379}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MDecoder", "MDecoder\MDecoder.vcproj", "{787348C8-2A6F-30B5-BC7B-27B82CA8DB9F}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{32821F4C-9227-3B03-B97A-2CD938863A61}.Debug|Win32.ActiveCfg = Debug|Win32
+		{32821F4C-9227-3B03-B97A-2CD938863A61}.Debug|Win32.Build.0 = Debug|Win32
+		{32821F4C-9227-3B03-B97A-2CD938863A61}.Release|Win32.ActiveCfg = Release|Win32
+		{32821F4C-9227-3B03-B97A-2CD938863A61}.Release|Win32.Build.0 = Release|Win32
+		{85B2BB1E-A0B4-3C0D-A423-4AA574176379}.Debug|Win32.ActiveCfg = Debug|Win32
+		{85B2BB1E-A0B4-3C0D-A423-4AA574176379}.Debug|Win32.Build.0 = Debug|Win32
+		{85B2BB1E-A0B4-3C0D-A423-4AA574176379}.Release|Win32.ActiveCfg = Release|Win32
+		{85B2BB1E-A0B4-3C0D-A423-4AA574176379}.Release|Win32.Build.0 = Release|Win32
+		{787348C8-2A6F-30B5-BC7B-27B82CA8DB9F}.Debug|Win32.ActiveCfg = Debug|Win32
+		{787348C8-2A6F-30B5-BC7B-27B82CA8DB9F}.Debug|Win32.Build.0 = Debug|Win32
+		{787348C8-2A6F-30B5-BC7B-27B82CA8DB9F}.Release|Win32.ActiveCfg = Release|Win32
+		{787348C8-2A6F-30B5-BC7B-27B82CA8DB9F}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		QtVersion = 4.8.2
+	EndGlobalSection
+EndGlobal

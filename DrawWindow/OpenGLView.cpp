@@ -185,23 +185,22 @@ int COpenGLView::OnCreate(void *handle)
     /*BOOL success = */SetPixelFormat(m_hDC, nPixelFormat, &pfd);
 
     m_hRenderRC = wglCreateContext(m_hDC);
-    m_hResouceRC = wglCreateContext(m_hDC);
-    BOOL error = wglShareLists(m_hRenderRC,m_hResouceRC);
+//    m_hResouceRC = wglCreateContext(m_hDC);
+//    BOOL error = wglShareLists(m_hRenderRC,m_hResouceRC);
 
-    if(error == FALSE)
-      {
-         DWORD errorCode=GetLastError();
-         LPVOID lpMsgBuf;
-         FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
-            NULL, errorCode, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),(LPTSTR) &lpMsgBuf, 0, NULL);
-         ::MessageBox( NULL, (LPCTSTR)lpMsgBuf, L"Error", MB_OK | MB_ICONINFORMATION );
-         LocalFree(lpMsgBuf);
-         //Destroy the GL context and just use 1 GL context
-//         wglDeleteContext(m_hResouceRC);
-      }
+//    if(error == FALSE)
+//      {
+//         DWORD errorCode=GetLastError();
+//         LPVOID lpMsgBuf;
+//         FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
+//            NULL, errorCode, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),(LPTSTR) &lpMsgBuf, 0, NULL);
+//         ::MessageBox( NULL, (LPCTSTR)lpMsgBuf, L"Error", MB_OK | MB_ICONINFORMATION );
+//         LocalFree(lpMsgBuf);
+//         //Destroy the GL context and just use 1 GL context
+////         wglDeleteContext(m_hResouceRC);
+//      }
 
     wglMakeCurrent(m_hDC, m_hRenderRC);
-//    wglMakeCurrent(NULL, NULL);
 
     glInital();
     return 0;
@@ -209,8 +208,7 @@ int COpenGLView::OnCreate(void *handle)
 
 void COpenGLView::OnDestroy()
 {
-    // TODO: Add your message handler code here
-    wglDeleteContext(m_hResouceRC);
+//    wglDeleteContext(m_hResouceRC);
     wglDeleteContext(m_hRenderRC);
     ::ReleaseDC( m_hWnd, m_hDC );
 }
@@ -305,11 +303,11 @@ void COpenGLView::moveToThread()
 {
     if (!m_hDC)
         return;
-    bool ret = wglMakeCurrent(m_hDC, m_hResouceRC);
+//    bool ret = wglMakeCurrent(m_hDC, m_hResouceRC);
 }
 
 void COpenGLView::removeFromThread()
 {
-    wglMakeCurrent(NULL, NULL);
+//    wglMakeCurrent(NULL, NULL);
 }
 

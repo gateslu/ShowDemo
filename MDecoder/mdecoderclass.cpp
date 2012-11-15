@@ -149,41 +149,46 @@ DWORD DecodeThread(PVOID pContext)
                 //                    SaveFrame(pThis->m_pFrameRGB, pThis->m_pCodecCtx->width, pThis->m_pCodecCtx->height, i);
                 //                }
 
-                if( i<=30 && i >20 /*&& pFrame->key_frame == 1*/)
-                {
-                    char *szFilename = (char *)malloc(256);
-                    sprintf(szFilename, "ori_vctest%d.bmp", i);
-                    SaveFrame(pThis->m_pFrameRGB->data[0], pThis->m_pFrameRGB->linesize[0], pThis->m_pCodecCtx->width, pThis->m_pCodecCtx->height, szFilename);
-                    free(szFilename);
-                }
-
-                for(int y=0; y<pThis->m_pCodecCtx->height; y++)
-                {
-                    memcpy(frameBuf+y*pThis->m_pCodecCtx->width*3,
-                           (const char*)pThis->m_pFrameRGB->data[0]+y*pThis->m_pFrameRGB->linesize[0],
-                            pThis->m_pCodecCtx->width*3);
-                }
-
                 //                if( i<=30 && i >20 /*&& pFrame->key_frame == 1*/)
                 //                {
                 //                    char *szFilename = (char *)malloc(256);
-                //                    sprintf(szFilename, "pack_vctest%d.bmp", i);
-                //                    SaveFrame(frameBuf, pThis->m_pCodecCtx->width*3, pThis->m_pCodecCtx->width, pThis->m_pCodecCtx->height, szFilename);
+                //                    sprintf(szFilename, "ori_vctest%d.bmp", i);
+                //                    SaveFrame(pThis->m_pFrameRGB->data[0], pThis->m_pFrameRGB->linesize[0], pThis->m_pCodecCtx->width, pThis->m_pCodecCtx->height, szFilename);
                 //                    free(szFilename);
                 //                }
 
-                enum AVPixelFormat bmp_fmt = AV_PIX_FMT_BGR24;
-                int bytes = avpicture_get_size(bmp_fmt, pThis->m_pCodecCtx->width, pThis->m_pCodecCtx->height);
+                //                for(int y=0; y<pThis->m_pCodecCtx->height; y++)
+                //                {
+                //                    memcpy(frameBuf+y*pThis->m_pCodecCtx->width*3,
+                //                           (const char*)pThis->m_pFrameRGB->data[0]+y*pThis->m_pFrameRGB->linesize[0],
+                //                            pThis->m_pCodecCtx->width*3);
+                //                }
 
-                rgbToBGR_Mirror(frameBuf, bytes, pThis->m_pCodecCtx->width, pThis->m_pCodecCtx->height, false, false);
+                /**/
+                //                //                if( i<=30 && i >20 /*&& pFrame->key_frame == 1*/)
+                //                //                {
+                //                //                    char *szFilename = (char *)malloc(256);
+                //                //                    sprintf(szFilename, "pack_vctest%d.bmp", i);
+                //                //                    SaveFrame(frameBuf, pThis->m_pCodecCtx->width*3, pThis->m_pCodecCtx->width, pThis->m_pCodecCtx->height, szFilename);
+                //                //                    free(szFilename);
+                //                //                }
 
-                //显示
-                pThis->m_displayFun(frameBuf, bytes, pThis->m_pCodecCtx->width, pThis->m_pCodecCtx->height, pThis->m_pContext);
+                //                enum AVPixelFormat bmp_fmt = AV_PIX_FMT_BGR24;
+                //                int bytes = avpicture_get_size(bmp_fmt, pThis->m_pCodecCtx->width, pThis->m_pCodecCtx->height);
+
+                //                rgbToBGR_Mirror(frameBuf, bytes, pThis->m_pCodecCtx->width, pThis->m_pCodecCtx->height, false, false);
+
+                //                //显示
+                //                pThis->m_displayFun(frameBuf, bytes, pThis->m_pCodecCtx->width, pThis->m_pCodecCtx->height, pThis->m_pContext);
+                /**/
+                //还需要考虑linesize
+                pThis->m_displayFun(pThis->m_pFrameRGB->data[0], pThis->m_numBytes, pThis->m_pCodecCtx->width, pThis->m_pCodecCtx->height, pThis->m_pContext);
 
                 i++;
             }
         }
-        ::Sleep(10);
+        //是否有其他方法可以控制帧率?
+        ::Sleep(33);
     }
     // Free the packet that was allocated by av_read_frame
     pThis->m_removeFromThread(pThis->m_pContext);
@@ -192,16 +197,6 @@ DWORD DecodeThread(PVOID pContext)
     return 0;
 }
 
-/*
- *    if (m_pFrame)
-        avcodec_free_frame(&m_pFrame);
-    if (m_pFrameRGB)
-        avcodec_free_frame(&m_pFrameRGB);
-    if (m_pFormatCtx)
-        avformat_free_context(m_pFormatCtx);
-    if (m_buffer)
-        free(m_buffer);
-*/
 MDecoderClass::MDecoderClass() :
     m_decodeThreadHandle(NULL),
     m_pFrame(NULL),
@@ -269,7 +264,7 @@ long MDecoderClass::threadTerminate()
 }
 
 long MDecoderClass::setDisplayFun(MDisplay display,     MoveToThreadCB moveToThread,
-                                    RemoveFromThreadCB removeFromThread, void *pContext)
+                                  RemoveFromThreadCB removeFromThread, void *pContext)
 {
     if (!display)
         return 1;

@@ -40,7 +40,7 @@ public:
     long freeBuffer();
     long threadTerminate();
     long setDisplayFun(MDisplay display, MoveToThreadCB moveToThread, RemoveFromThreadCB removeFromThread, void *pContext);
-    long openDecoder(const char *filename);
+    long openDecoder(const char *filename, int &_Width, int &_Height);
     long play();
     long pause();
     long stop();

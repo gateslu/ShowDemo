@@ -1,7 +1,7 @@
 /********************************************************************************
 ** Form generated from reading UI file 'showdemo.ui'
 **
-** Created: Thu Nov 15 16:23:37 2012
+** Created: Thu Nov 15 23:58:28 2012
 **      by: Qt User Interface Compiler version 4.8.3
 **
 ** WARNING! All changes made in this file will be lost when recompiling UI file!

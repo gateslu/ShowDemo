@@ -81,6 +81,20 @@ long ResizeDisplayWindow(GLHANDLE _handle, int Width, int Height)
     return iReturn;
 }
 
+long PreDrawWindow(GLHANDLE _glhandle, unsigned char *pBuf, int Width, int Height)
+{
+    int iReturn = 1;
+    if (_glhandle == NULL)
+        return iReturn;
+
+    COpenGLView *m_DrawC = (COpenGLView *)_glhandle;
+    m_DrawC->initParam(Width,  Height);
+    m_DrawC->LoadTexture(pBuf,  Width,  Height);
+    iReturn = 0;
+
+    return iReturn;
+}
+
 long DrawWindow(GLHANDLE _glhandle, unsigned char *pBuf, int Width, int Height)
 {
     int iReturn = 1;
@@ -88,7 +102,7 @@ long DrawWindow(GLHANDLE _glhandle, unsigned char *pBuf, int Width, int Height)
         return iReturn;
 
     COpenGLView *m_DrawC = (COpenGLView *)_glhandle;
-    m_DrawC->SetParam(Width,  Height);
+    m_DrawC->initParam(Width,  Height);
     m_DrawC->LoadTexture(pBuf,  Width,  Height);
     iReturn = 0;
 

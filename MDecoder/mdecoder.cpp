@@ -16,13 +16,13 @@ int ReleaseDecoder (DECHANDLE _dec)
     return 0;
 }
 
-int OpenDecoder (DECHANDLE _dec, const char *filename)
+int OpenDecoder (DECHANDLE _dec, const char *filename, int &_Width, int &_Height)
 {
     if (!_dec)
         return 1;
 
     MDecoderClass *m_dec = (MDecoderClass *)_dec;
-    m_dec->openDecoder(filename);
+    m_dec->openDecoder(filename,_Width, _Height);
 
     return 1;
 }

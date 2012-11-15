@@ -1,6 +1,6 @@
 #include "showdemo.h"
 #include "ui_showdemo.h"
-#include "qt_windows.h"
+
 
 #include "drawwindow.h"
 #include "GlobalHeader.h"
@@ -42,19 +42,24 @@ DWORD testThread(PVOID pContext)
     free(szFilename);
     free(bmpBuf);
 
+    RemoveFromThread(pThis->m_drawhandle);
+
+    pThis->testTH = NULL;
     return 0;
 }
 
 static void mMoveToThread(void * pContext)
 {
+    qDebug() << QThread::currentThreadId();
     ShowDemo *pThis = (ShowDemo *)pContext;
-    //    MoveToThread(pThis->m_drawhandle);
+    MoveToThread(pThis->m_drawhandle);
 }
 
 static void mRemoveFromThread(void * pContext)
 {
+    qDebug() << QThread::currentThreadId();
     ShowDemo *pThis = (ShowDemo *)pContext;
-    //    RemoveFromThread(pThis->m_drawhandle);
+    RemoveFromThread(pThis->m_drawhandle);
 }
 
 static void mDisplay(unsigned char *pBuf, int bufSize ,int Width, int Height, void * pContext)
@@ -66,6 +71,8 @@ static void mDisplay(unsigned char *pBuf, int bufSize ,int Width, int Height, vo
     //    {
     pThis->Width = Width;
     pThis->Height = Height;
+    if (pThis->buffer == NULL || pBuf == NULL)
+        return;
     memcpy(pThis->buffer, pBuf,bufSize);
     pThis->display(pThis->buffer,pThis->Width,pThis->Height);
     //    }
@@ -160,7 +167,8 @@ ShowDemo::ShowDemo(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::ShowDemo),
     m_drawhandle(NULL),
-    m_decoder(NULL)
+    m_decoder(NULL),
+    testTH(NULL)
 {
     ui->setupUi(this);
     Width=0;
@@ -186,6 +194,7 @@ ShowDemo::ShowDemo(QWidget *parent) :
 ShowDemo::~ShowDemo()
 {
     free(buffer);
+    buffer = NULL;
     delete ui;
 }
 
@@ -288,7 +297,8 @@ void ShowDemo::on_ResizeWin_clicked()
 
 void ShowDemo::on_openViedoFile_clicked()
 {
-    OpenDecoder(m_decoder, ui->filePath->text().toLocal8Bit().constData());
+    OpenDecoder(m_decoder, ui->filePath->text().toLocal8Bit().constData(), Width, Height);
+    PreDrawWindow(m_drawhandle,buffer,Width, Height);
 }
 
 void ShowDemo::on_playbtn_clicked()
@@ -309,7 +319,9 @@ void ShowDemo::on_stopbtn_clicked()
 
 void ShowDemo::on_ThreadDraw_clicked()
 {
+    if (testTH)
+        return;
     qDebug() << "on_ThreadDraw_clicked" << QThread::currentThreadId();
-    HANDLE testTH = CreateThread(NULL,0,(LPTHREAD_START_ROUTINE)testThread,(PVOID)this,0,NULL);
+    testTH = CreateThread(NULL,0,(LPTHREAD_START_ROUTINE)testThread,(PVOID)this,0,NULL);
     CloseHandle(testTH);
 }

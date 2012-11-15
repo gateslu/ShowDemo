@@ -38,7 +38,7 @@
 DWORD drawThread(PVOID pContext)
 {
     COpenGLView *pThis = (COpenGLView *)pContext;
-    wglMakeCurrent(pThis->m_hDC, pThis->m_hRC);
+    wglMakeCurrent(pThis->m_hDC, pThis->m_hResouceRC);
     int n = 0;
     while (n < 100)
     {
@@ -51,7 +51,8 @@ DWORD drawThread(PVOID pContext)
 }
 
 COpenGLView::COpenGLView() :
-    m_hRC(NULL),
+    m_hResouceRC(NULL),
+    m_hRenderRC(NULL),
     m_hDC(NULL)
 {
     loaded = FALSE;
@@ -72,7 +73,7 @@ COpenGLView::~COpenGLView()
 
 void COpenGLView::OnDraw()
 {
-//    HDC dc = ::GetDC(m_hWnd);
+    //    HDC dc = ::GetDC(m_hWnd);
 
     glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);		// clear screen and depth buffer
     glLoadIdentity();
@@ -94,9 +95,9 @@ void COpenGLView::OnDraw()
         glEnd();
     }
     SwapBuffers( m_hDC );
-//    SwapBuffers( dc );
+    //    SwapBuffers( dc );
 
-//    ::ReleaseDC( m_hWnd, dc );
+    //    ::ReleaseDC( m_hWnd, dc );
 
 }
 
@@ -178,23 +179,39 @@ int COpenGLView::OnCreate(void *handle)
         0, 0, 0                           //ºöÂÔ²ãÕÚÕÖ
     };
 
-//    HDC hdc = ::GetDC(m_hWnd);
+    //    HDC hdc = ::GetDC(m_hWnd);
     m_hDC = ::GetDC(m_hWnd);
     nPixelFormat = ChoosePixelFormat(m_hDC, &pfd);
     /*BOOL success = */SetPixelFormat(m_hDC, nPixelFormat, &pfd);
-    m_hRC = wglCreateContext(m_hDC);
 
-//    wglMakeCurrent(m_hDC, m_hRC);
-    wglMakeCurrent(NULL, NULL);
+    m_hRenderRC = wglCreateContext(m_hDC);
+    m_hResouceRC = wglCreateContext(m_hDC);
+    BOOL error = wglShareLists(m_hRenderRC,m_hResouceRC);
+
+    if(error == FALSE)
+      {
+         DWORD errorCode=GetLastError();
+         LPVOID lpMsgBuf;
+         FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
+            NULL, errorCode, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),(LPTSTR) &lpMsgBuf, 0, NULL);
+         ::MessageBox( NULL, (LPCTSTR)lpMsgBuf, L"Error", MB_OK | MB_ICONINFORMATION );
+         LocalFree(lpMsgBuf);
+         //Destroy the GL context and just use 1 GL context
+//         wglDeleteContext(m_hResouceRC);
+      }
+
+    wglMakeCurrent(m_hDC, m_hRenderRC);
+//    wglMakeCurrent(NULL, NULL);
+
     glInital();
-//    moveToThread();
     return 0;
 }
 
 void COpenGLView::OnDestroy()
 {
     // TODO: Add your message handler code here
-    wglDeleteContext(m_hRC);
+    wglDeleteContext(m_hResouceRC);
+    wglDeleteContext(m_hRenderRC);
     ::ReleaseDC( m_hWnd, m_hDC );
 }
 
@@ -215,19 +232,36 @@ void COpenGLView::OnSize(int cx, int cy)
     glScalef( ratio_x*1.1, ratio_y, 1.f );
 }
 
+
+
+void COpenGLView::initParam(int _width, int _height)
+{
+    //    for( t_width = 2  ; t_width  < _width  ; t_width  *= 2 );
+    //    for( t_height = 2 ; t_height < _height ; t_height *= 2 );
+    if (_width == 0 || _height == 0)
+        return;
+
+    this->t_width = _width;
+    this->t_height = _height;
+
+    this->ratio_x = (float)t_width/(float)width;
+    this->ratio_y = (float)t_height/(float)height;
+}
+
 void COpenGLView::SetParam(int _width, int _height)
 {
     //    for( t_width = 2  ; t_width  < _width  ; t_width  *= 2 );
     //    for( t_height = 2 ; t_height < _height ; t_height *= 2 );
     if (_width == 0 || _height == 0)
         return;
-    t_width = _width;
-    t_height = _height;
+
+    this->t_width = _width;
+    this->t_height = _height;
 
     this->ratio_x = (float)t_width/(float)width;
     this->ratio_y = (float)t_height/(float)height;
 
-//    loaded = FALSE;
+    loaded = FALSE;
 }
 
 void COpenGLView::SetParamEX(int _width, int _height, float _ratio_x, float _ratio_y)
@@ -236,21 +270,23 @@ void COpenGLView::SetParamEX(int _width, int _height, float _ratio_x, float _rat
     //    for( t_height = 2 ; t_height < _height ; t_height *= 2 );
     if (_width == 0 || _height == 0)
         return;
+
+    //    if (t_width == _width && t_height == _height && ratio_x == _ratio_x && ratio_y == _ratio_y)
+    //        return;
+
     t_width = _width;
     t_height = _height;
 
-    this->ratio_x = _ratio_x;
-    this->ratio_y = _ratio_y;
+    ratio_x = _ratio_x;
+    ratio_y = _ratio_y;
 
-    loaded = FALSE;
+//    loaded = FALSE;
 }
 
 
 void COpenGLView::LoadTexture(unsigned char* rgba, int _width, int _height)
 {
-    //    t_width = _width;
-    //    t_height = _height;
-//    moveToThread();
+    wglMakeCurrent(m_hDC, m_hRenderRC);
     glBindTexture(GL_TEXTURE_2D, texture );
     if( loaded )
     {
@@ -262,16 +298,14 @@ void COpenGLView::LoadTexture(unsigned char* rgba, int _width, int _height)
     }
 //    ::InvalidateRect(m_hWnd,NULL,TRUE);
     OnDraw();
-    HANDLE testTH = CreateThread(NULL,0,(LPTHREAD_START_ROUTINE)drawThread,(PVOID)this,0,NULL);
-    CloseHandle(testTH);
+    wglMakeCurrent(NULL, NULL);
 }
 
 void COpenGLView::moveToThread()
 {
     if (!m_hDC)
         return;
-    bool ret = wglMakeCurrent(m_hDC, m_hRC);
-    glInital();
+    bool ret = wglMakeCurrent(m_hDC, m_hResouceRC);
 }
 
 void COpenGLView::removeFromThread()

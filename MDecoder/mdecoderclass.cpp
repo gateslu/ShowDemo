@@ -183,10 +183,10 @@ DWORD DecodeThread(PVOID pContext)
                 i++;
             }
         }
-        ::Sleep(30);
+        ::Sleep(10);
     }
     // Free the packet that was allocated by av_read_frame
-    pThis->m_moveToThread(pThis->m_removeFromThread);
+    pThis->m_removeFromThread(pThis->m_pContext);
     av_free_packet(&packet);
     free(frameBuf);
     return 0;
@@ -229,10 +229,12 @@ MDecoderClass::MDecoderClass() :
 
 MDecoderClass::~MDecoderClass()
 {
-    threadTerminate();
-    freeBuffer();
     m_displayFun = NULL;
     m_pContext = NULL;
+    threadTerminate();
+    freeBuffer();
+    this->m_moveToThread = NULL;
+    this->m_removeFromThread = NULL;
 }
 
 long MDecoderClass::freeBuffer()
@@ -278,7 +280,7 @@ long MDecoderClass::setDisplayFun(MDisplay display,     MoveToThreadCB moveToThr
     return 0;
 }
 
-long MDecoderClass::openDecoder(const char *filename)
+long MDecoderClass::openDecoder(const char *filename, int &_Width, int &_Height)
 {
     threadTerminate();
     freeBuffer();
@@ -319,7 +321,8 @@ long MDecoderClass::openDecoder(const char *filename)
     m_buffer=(uint8_t *)av_malloc(m_numBytes*sizeof(uint8_t));
 
     avpicture_fill((AVPicture *)m_pFrameRGB,m_buffer, AV_PIX_FMT_RGB24,m_pCodecCtx->width, m_pCodecCtx->height);
-
+    _Width = m_pCodecCtx->width;
+    _Height = m_pCodecCtx->height;
     return 0;
 }
 

@@ -52,7 +52,8 @@ public:
 
 public:
     HDC			m_hDC;		// Private GDI Device Context
-    HGLRC		m_hRC;		// Permanent Rendering Context
+    HGLRC		m_hResouceRC;		// ×ÊÔ´ Rendering Context
+    HGLRC		m_hRenderRC;		    // »æÖÆ Rendering Context
     HWND		m_hWnd;		// Holds Our Window Handle
 
 	unsigned char* im;
@@ -75,6 +76,7 @@ public:
     void OnDraw();      // overridden to draw this view
     void OnDestroy();
     void OnSize(int cx, int cy);
+    void initParam(int _width, int _height);
     void SetParam(int _width, int _height);
     void SetParamEX(int _width, int _height, float _ratio_x, float _ratio_y);
     void LoadTexture(unsigned char* rgba,int _width, int _height);

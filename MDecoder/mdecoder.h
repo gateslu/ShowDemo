@@ -19,7 +19,7 @@ typedef void (*RemoveFromThreadCB)(void * pContext);
 
 MDECODER_API DECHANDLE InitDecoder (void);
 MDECODER_API int ReleaseDecoder (DECHANDLE _dec);
-MDECODER_API int OpenDecoder (DECHANDLE _dec, const char *filename);
+MDECODER_API int OpenDecoder (DECHANDLE _dec, const char *filename, int &_Width, int &_Height);
 MDECODER_API int SetCallbackf(DECHANDLE _dec, fDataCallback dcb);
 MDECODER_API int SetDisplay(DECHANDLE _dec, MDisplay display, MoveToThreadCB moveToThread, RemoveFromThreadCB removeFromThread, void * pContext);
 MDECODER_API int v_setPlay(DECHANDLE _dec);

@@ -3,6 +3,7 @@
 
 #include <QtCore>
 #include <QtGui>
+#include "qt_windows.h"
 #include "drawwindow.h"
 #include "mdecoder.h"
 
@@ -53,6 +54,8 @@ public:
     GLHANDLE m_drawhandle;
 
     DECHANDLE m_decoder;
+
+    HANDLE testTH;
 
 private:
     Ui::ShowDemo *ui;

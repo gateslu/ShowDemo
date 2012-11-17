@@ -53,6 +53,7 @@ public:
     AVFrame         *m_pFrame;
     AVFrame         *m_pFrameRGB;
     AVPacket        packet;
+    AVStream  *m_video_st;
     int m_numBytes;
     uint8_t         *m_buffer;
     struct SwsContext *img_convert_ctx;

@@ -73,7 +73,7 @@ COpenGLView::~COpenGLView()
 
 void COpenGLView::OnDraw()
 {
-    //    HDC dc = ::GetDC(m_hWnd);
+//   HDC dc = ::GetDC(m_hWnd);
 
     glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);		// clear screen and depth buffer
     glLoadIdentity();
@@ -95,9 +95,8 @@ void COpenGLView::OnDraw()
         glEnd();
     }
     SwapBuffers( m_hDC );
-    //    SwapBuffers( dc );
-
-    //    ::ReleaseDC( m_hWnd, dc );
+//    SwapBuffers( dc );
+//    ::ReleaseDC( m_hWnd, dc );
 
 }
 

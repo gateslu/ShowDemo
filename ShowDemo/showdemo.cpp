@@ -188,7 +188,7 @@ ShowDemo::ShowDemo(QWidget *parent) :
     setDecoder();
     on_InitDraw_clicked();
 
-    ui->filePath->setText(QString("%1/%2/%3").arg(qApp->applicationDirPath()).arg("demovideo").arg("test.h264"));
+    ui->filePath->setText(QString("%1/%2/%3").arg(qApp->applicationDirPath()).arg("demovideo").arg("123.avi"));
 }
 
 ShowDemo::~ShowDemo()

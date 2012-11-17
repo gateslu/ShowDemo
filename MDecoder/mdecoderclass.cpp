@@ -3,6 +3,7 @@
 #include "stdlib.h"
 #include "stdio.h"
 #include <cstdio>
+#include <QDebug>
 
 #define DISPLAYBUFZISE (1920*1080*4)
 
@@ -99,9 +100,16 @@ DWORD DecodeThread(PVOID pContext)
     AVPacket packet;
     int frameFinished;
     int i =0;
+    int rc = 0;
+    int drop = 0;
     //读视频帧
-    while(av_read_frame(pThis->m_pFormatCtx, &packet)>=0)
+    while(true)
     {
+        av_init_packet(&packet);
+        //            rc = av_read_packet(pThis->m_pFormatCtx,&packet); /* 获取一个包的数据 */
+        //          if (rc != 0) break;
+        if (av_read_frame(pThis->m_pFormatCtx, &packet) < 0)
+            break;
         memset(frameBuf, 0, DISPLAYBUFZISE);
         while (pThis->m_pause)
             ::Sleep(50);
@@ -109,6 +117,7 @@ DWORD DecodeThread(PVOID pContext)
             break;
         if(packet.stream_index == pThis->videoStream)
         {
+
             int result;
             avcodec_decode_video2(pThis->m_pCodecCtx,pThis->m_pFrame,&frameFinished,
                                   &packet);
@@ -142,53 +151,23 @@ DWORD DecodeThread(PVOID pContext)
                                    pThis->m_pFrameRGB->data,
                                    pThis->m_pFrameRGB->linesize);
 
-                //                //截图
-                //                if (pThis->m_pFrame->pict_type == AV_PICTURE_TYPE_I)
-                //                {
-                //                    printf("AV_PICTURE_TYPE_I : i = %d\n", i);
-                //                    SaveFrame(pThis->m_pFrameRGB, pThis->m_pCodecCtx->width, pThis->m_pCodecCtx->height, i);
-                //                }
-
-                //                if( i<=30 && i >20 /*&& pFrame->key_frame == 1*/)
-                //                {
-                //                    char *szFilename = (char *)malloc(256);
-                //                    sprintf(szFilename, "ori_vctest%d.bmp", i);
-                //                    SaveFrame(pThis->m_pFrameRGB->data[0], pThis->m_pFrameRGB->linesize[0], pThis->m_pCodecCtx->width, pThis->m_pCodecCtx->height, szFilename);
-                //                    free(szFilename);
-                //                }
-
-                //                for(int y=0; y<pThis->m_pCodecCtx->height; y++)
-                //                {
-                //                    memcpy(frameBuf+y*pThis->m_pCodecCtx->width*3,
-                //                           (const char*)pThis->m_pFrameRGB->data[0]+y*pThis->m_pFrameRGB->linesize[0],
-                //                            pThis->m_pCodecCtx->width*3);
-                //                }
-
-                /**/
-                //                //                if( i<=30 && i >20 /*&& pFrame->key_frame == 1*/)
-                //                //                {
-                //                //                    char *szFilename = (char *)malloc(256);
-                //                //                    sprintf(szFilename, "pack_vctest%d.bmp", i);
-                //                //                    SaveFrame(frameBuf, pThis->m_pCodecCtx->width*3, pThis->m_pCodecCtx->width, pThis->m_pCodecCtx->height, szFilename);
-                //                //                    free(szFilename);
-                //                //                }
-
-                //                enum AVPixelFormat bmp_fmt = AV_PIX_FMT_BGR24;
-                //                int bytes = avpicture_get_size(bmp_fmt, pThis->m_pCodecCtx->width, pThis->m_pCodecCtx->height);
-
-                //                rgbToBGR_Mirror(frameBuf, bytes, pThis->m_pCodecCtx->width, pThis->m_pCodecCtx->height, false, false);
-
-                //                //显示
-                //                pThis->m_displayFun(frameBuf, bytes, pThis->m_pCodecCtx->width, pThis->m_pCodecCtx->height, pThis->m_pContext);
                 /**/
                 //还需要考虑linesize
-                pThis->m_displayFun(pThis->m_pFrameRGB->data[0], pThis->m_numBytes, pThis->m_pCodecCtx->width, pThis->m_pCodecCtx->height, pThis->m_pContext);
-
+//                if (pThis->m_pFrame->pict_type == AV_PICTURE_TYPE_I)
+//                {
+                    pThis->m_displayFun(pThis->m_pFrameRGB->data[0], pThis->m_numBytes, pThis->m_pCodecCtx->width, pThis->m_pCodecCtx->height, pThis->m_pContext);
+//                }
+                qDebug() << i << pThis->m_pCodecCtx->bit_rate <<  av_q2d(pThis->m_video_st->codec->time_base) << "******************************************************************************";
+                qDebug() << pThis->m_pFrame->width << pThis->m_pFrame->height;
+                //                qDebug() << packet.pts << packet.pos << packet.size << packet.stream_index  ;
+                //                qDebug() << "AVPictureType" << pThis->m_pFrame->pict_type;
+                //                qDebug() << pThis->m_pFrame->pts << pThis->m_pFrame->pkt_pts << pThis->m_pFrame->pkt_dts <<  pThis->m_pFrame->pkt_pos <<  pThis->m_pFrame->pkt_duration;
+                //                qDebug() << "******************************************************************************";
                 i++;
             }
         }
         //是否有其他方法可以控制帧率?
-        ::Sleep(33);
+        ::Sleep(10);
     }
     // Free the packet that was allocated by av_read_frame
     pThis->m_removeFromThread(pThis->m_pContext);
@@ -300,12 +279,14 @@ long MDecoderClass::openDecoder(const char *filename, int &_Width, int &_Height)
     if(videoStream==-1)
         return 1;
     m_pCodecCtx = m_pFormatCtx->streams[videoStream]->codec;
+    m_video_st = m_pFormatCtx->streams[videoStream];
     m_pCodec = avcodec_find_decoder(m_pCodecCtx->codec_id);
     if(m_pCodec==NULL)
         return 1;
 
-    if(m_pCodec->capabilities & CODEC_CAP_TRUNCATED)
-        m_pCodecCtx->flags|=CODEC_FLAG_TRUNCATED;
+    //必须注释掉，不然会花屏
+//    if(m_pCodec->capabilities & CODEC_CAP_TRUNCATED)
+//        m_pCodecCtx->flags|=CODEC_FLAG_TRUNCATED;
 
     if(avcodec_open(m_pCodecCtx, m_pCodec)<0)
         return 1;
